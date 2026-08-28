@@ -257,6 +257,8 @@ The name you pass (e.g., `"my_agent"`) is what you will use on the CLI with `--a
 
 Use the built-in `external_agent` implementation when the agent runs outside the tau2 process and executes an entire turn through its own tool system. Tau2 starts one driver per task, exposes only that task's environment tools over an authenticated loopback HTTP endpoint, and converts completed calls into the standard trajectory consumed by the evaluators.
 
+For a complete standalone adapter package, copyable file contents, black-box process protocol, security rules, and release checklist, see the [External Whole-Machine Agent Integration Guide](../../../docs/external-agent-integration.md).
+
 ### Implement a driver adapter
 
 The adapter can invoke a subprocess, container, local application, or remote client. It does not need access to the evaluated agent's source code.

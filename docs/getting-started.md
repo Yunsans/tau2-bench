@@ -206,6 +206,7 @@ make clean
 
 - [CLI Reference](cli-reference.md) — all `tau2` commands and options
 - [Agent Developer Guide](../src/tau2/agent/README.md) — build and evaluate your own agent
+- [External Whole-Machine Agent Integration](external-agent-integration.md) — evaluate an opaque agent with its own runtime and tool system
 - [Domain Documentation](../src/tau2/domains/README.md) — understand the available domains
 - [Communication Modes](../src/tau2/orchestrator/README.md) — half-duplex and full-duplex orchestration
 - [Task Schema & Evaluation](evaluation.md) — how a task is scored, what `actions`/`communicate_info`/`reward_basis` actually do
