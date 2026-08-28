@@ -117,6 +117,7 @@ def build_agent(
     return agent_factory(
         tools=tools,
         domain_policy=environment.get_policy(),
+        tool_executor=environment.get_response,
         llm=llm,
         llm_args=llm_args,
         task=task,

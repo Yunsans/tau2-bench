@@ -16,6 +16,10 @@ from tau2.agent.base_agent import (
     is_valid_agent_history_message,
 )
 from tau2.agent.llm_agent import LLMSoloAgent
+from tau2.agent.tool_execution import (
+    ToolExecutionSource,
+    materialize_tool_executions,
+)
 from tau2.data_model.message import (
     AssistantMessage,
     Message,
@@ -863,6 +867,12 @@ class Orchestrator(BaseOrchestrator[AgentT, UserT, Message]):
                 self.done = True
                 self.termination_reason = TerminationReason.AGENT_STOP
 
+            if isinstance(self.agent, ToolExecutionSource):
+                executions = self.agent.drain_tool_executions()
+                self.trajectory.extend(materialize_tool_executions(executions))
+                self.num_errors += sum(
+                    execution.result.error for execution in executions
+                )
             self.trajectory.append(agent_msg)
             self.message = agent_msg
             self.from_role = Role.AGENT

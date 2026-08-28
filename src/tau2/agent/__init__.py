@@ -19,6 +19,13 @@ from tau2.agent.base_agent import (
     HalfDuplexVoiceAgent,
     ValidAgentInputMessage,
 )
+from tau2.agent.external import (
+    ExternalAgent,
+    ExternalAgentContext,
+    ExternalAgentDriver,
+    ExternalToolEndpoint,
+    make_external_agent_factory,
+)
 from tau2.agent.llm_agent import LLMAgent, LLMAgentState, LLMGTAgent, LLMSoloAgent
 
 # =============================================================================
@@ -88,6 +95,12 @@ __all__ = [
     "LLMAgentState",
     "LLMGTAgent",
     "LLMSoloAgent",
+    # External agents
+    "ExternalAgent",
+    "ExternalAgentContext",
+    "ExternalAgentDriver",
+    "ExternalToolEndpoint",
+    "make_external_agent_factory",
     # Deprecated aliases (kept for backward compatibility)
     "BaseConversationParticipant",
     "BaseStreamingParticipant",
