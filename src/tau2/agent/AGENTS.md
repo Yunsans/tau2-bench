@@ -51,7 +51,8 @@ Every agent needs a factory function and registry entry:
 ```python
 # Factory signature:
 def create_agent(tools, domain_policy, **kwargs):
-    # kwargs may include: llm, llm_args, task, audio_native_config, etc.
+    # kwargs may include: llm, llm_args, task, tool_executor,
+    # external_agent, audio_native_config, etc.
     return MyAgent(tools=tools, domain_policy=domain_policy, ...)
 
 # In src/tau2/registry.py:

@@ -16,6 +16,7 @@ from tau2.agent.base_agent import FullDuplexAgent, HalfDuplexAgent
 from tau2.agent.llm_agent import LLMAgent, LLMSoloAgent
 from tau2.data_model.simulation import (
     BaseRunConfig,
+    ExternalAgentConfig,
     RunConfig,
     SimulationRun,
     TextRunConfig,
@@ -95,6 +96,7 @@ __all__ = [
     "evaluate_simulation",
     "EvaluationType",
     "BaseRunConfig",
+    "ExternalAgentConfig",
     "TextRunConfig",
     "VoiceRunConfig",
     "RunConfig",

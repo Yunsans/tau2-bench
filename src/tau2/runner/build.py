@@ -73,6 +73,7 @@ def build_agent(
     llm_args: Optional[dict] = None,
     task: Optional[Task] = None,
     audio_native_config: Optional[AudioNativeConfig] = None,
+    external_agent: Optional[dict] = None,
     solo_mode: bool = False,
     audio_taps_dir: Optional[Path] = None,
 ) -> Union[HalfDuplexAgent, FullDuplexAgent]:
@@ -89,6 +90,7 @@ def build_agent(
         llm_args: LLM arguments for the agent (half-duplex agents).
         task: The task (required for some agents like llm_agent_gt, llm_agent_solo).
         audio_native_config: Audio config (full-duplex agents).
+        external_agent: Serializable external agent driver configuration.
         solo_mode: If True, agent tools include both agent and user tools.
 
     Returns:
@@ -117,10 +119,12 @@ def build_agent(
     return agent_factory(
         tools=tools,
         domain_policy=environment.get_policy(),
+        tool_executor=environment.get_response,
         llm=llm,
         llm_args=llm_args,
         task=task,
         audio_native_config=audio_native_config,
+        external_agent=external_agent,
         audio_taps_dir=audio_taps_dir,
     )
 
@@ -399,6 +403,11 @@ def build_text_orchestrator(
         llm_args=config.llm_args_agent,
         task=task,
         solo_mode=solo_mode,
+        external_agent=(
+            config.external_agent.model_dump(mode="json")
+            if config.external_agent is not None
+            else None
+        ),
     )
 
     user = build_user(
