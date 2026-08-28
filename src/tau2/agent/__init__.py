@@ -24,6 +24,7 @@ from tau2.agent.external import (
     ExternalAgentContext,
     ExternalAgentDriver,
     ExternalToolEndpoint,
+    create_external_agent,
     make_external_agent_factory,
 )
 from tau2.agent.llm_agent import LLMAgent, LLMAgentState, LLMGTAgent, LLMSoloAgent
@@ -100,6 +101,7 @@ __all__ = [
     "ExternalAgentContext",
     "ExternalAgentDriver",
     "ExternalToolEndpoint",
+    "create_external_agent",
     "make_external_agent_factory",
     # Deprecated aliases (kept for backward compatibility)
     "BaseConversationParticipant",

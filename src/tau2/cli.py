@@ -84,6 +84,15 @@ def add_run_args(parser):
         help=f"The arguments to pass to the LLM for the agent. Default is '{{\"temperature\": {DEFAULT_LLM_TEMPERATURE_AGENT}}}'.",
     )
     parser.add_argument(
+        "--external-agent-config",
+        type=json.loads,
+        default=None,
+        help=(
+            "External agent configuration as JSON. Required with "
+            "--agent external_agent."
+        ),
+    )
+    parser.add_argument(
         "--user",
         type=str,
         choices=get_options().users,
@@ -695,6 +704,7 @@ def main():
                 agent=args.agent,
                 llm_agent=args.agent_llm,
                 llm_args_agent=args.agent_llm_args,
+                external_agent=args.external_agent_config,
                 user=args.user,
                 max_steps=args.max_steps,
                 enforce_communication_protocol=args.enforce_communication_protocol,

@@ -235,6 +235,8 @@ def create_agent(tools, domain_policy, **kwargs):
             - llm (str): LLM model name (from --agent-llm)
             - llm_args (dict): Additional LLM arguments
             - task (Task): The current task being evaluated
+            - tool_executor (Callable): Execute a ToolCall in the current Environment
+            - external_agent (dict): External agent driver configuration, when used
     """
     return MyAgent(tools=tools, domain_policy=domain_policy, ...)
 ```
@@ -250,6 +252,73 @@ registry.register_agent_factory(create_my_agent, "my_agent")
 ```
 
 The name you pass (e.g., `"my_agent"`) is what you will use on the CLI with `--agent`.
+
+## Evaluating an External Whole-Machine Agent
+
+Use the built-in `external_agent` implementation when the agent runs outside the tau2 process and executes an entire turn through its own tool system. Tau2 starts one driver per task, exposes only that task's environment tools over an authenticated loopback HTTP endpoint, and converts completed calls into the standard trajectory consumed by the evaluators.
+
+### Implement a driver adapter
+
+The adapter can invoke a subprocess, container, local application, or remote client. It does not need access to the evaluated agent's source code.
+
+```python
+from tau2.agent import ExternalAgentContext
+
+
+class MyDriver:
+    def __init__(self, command: list[str]):
+        self.command = command
+        self.process = None
+
+    def start(self, context: ExternalAgentContext) -> None:
+        # Start one isolated agent session. Give the agent the policy,
+        # message history, and context.tool_endpoint using its supported
+        # configuration mechanism.
+        ...
+
+    def respond(self, user_message: str) -> str:
+        # Run one complete turn. Do not return until every tool request made
+        # by this turn has completed.
+        ...
+
+    def stop(self) -> None:
+        # This method must be safe after partial startup and must unblock an
+        # in-progress start() or respond() call.
+        ...
+
+
+def create_driver(command: list[str]) -> MyDriver:
+    return MyDriver(command=command)
+```
+
+The configured factory must return an object implementing `start(context)`, `respond(user_message)`, and `stop()`. Put the adapter in an importable Python module. In controller/worker mode, install that module in every worker environment.
+
+### Tool endpoint
+
+`context.tool_endpoint` contains `url`, `bearer_token`, and the derived `authorization_header`. The endpoint supports:
+
+- `GET /health`
+- `GET /tools`, returning OpenAI-compatible function schemas
+- `POST /tools/{tool_name}`, with the tool arguments as the JSON request body
+
+Send `Authorization: Bearer <token>` on every request. Tool execution is allowed only while `respond()` is active; requests during startup or after the turn returns receive HTTP 409. Tau2 waits for calls already executing when the turn closes, records tool errors toward `max_errors`, and replays the resulting standard messages during evaluation.
+
+### Run from the CLI
+
+```bash
+tau2 run \
+  --domain mock \
+  --agent external_agent \
+  --external-agent-config '{
+    "driver": "my_adapter:create_driver",
+    "driver_args": {"command": ["my-agent", "serve"]},
+    "startup_timeout": 30,
+    "turn_timeout": 900
+  }' \
+  --num-tasks 1
+```
+
+`driver` uses `module:attribute` syntax. `driver_args` must be JSON-serializable because controller workers reconstruct the configuration from JSON. `startup_timeout` and `turn_timeout` are positive seconds. A timeout stops the driver and closes its tool endpoint; tau2 then records the simulation as a failed attempt according to the normal runner policy.
 
 ## Understanding the Environment
 

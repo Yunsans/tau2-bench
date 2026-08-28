@@ -531,6 +531,41 @@ class BaseRunConfig(BaseModel):
         pass
 
 
+class ExternalAgentConfig(BaseModel):
+    """Serializable configuration for loading an external agent driver."""
+
+    driver: Annotated[
+        str,
+        Field(
+            description="Import path to a driver factory in module:attribute form",
+            pattern=r"^[^:]+:[^:]+$",
+        ),
+    ]
+    driver_args: Annotated[
+        dict,
+        Field(
+            description="JSON-serializable keyword arguments for the driver factory",
+            default_factory=dict,
+        ),
+    ]
+    startup_timeout: Annotated[
+        float,
+        Field(
+            description="Maximum seconds allowed for driver startup",
+            default=30.0,
+            gt=0,
+        ),
+    ]
+    turn_timeout: Annotated[
+        float,
+        Field(
+            description="Maximum seconds allowed for one external agent turn",
+            default=900.0,
+            gt=0,
+        ),
+    ]
+
+
 class TextRunConfig(BaseRunConfig):
     """Configuration for half-duplex (text) simulations.
 
@@ -558,6 +593,13 @@ class TextRunConfig(BaseRunConfig):
         Field(
             description="The arguments to pass to the LLM for the agent",
             default_factory=lambda: deepcopy(DEFAULT_LLM_ARGS_AGENT),
+        ),
+    ]
+    external_agent: Annotated[
+        Optional["ExternalAgentConfig"],
+        Field(
+            description="Configuration for the declarative external_agent adapter",
+            default=None,
         ),
     ]
 
@@ -592,6 +634,14 @@ class TextRunConfig(BaseRunConfig):
             default=None,
         ),
     ]
+
+    @model_validator(mode="after")
+    def _require_external_agent_config(self) -> "TextRunConfig":
+        if self.agent == "external_agent" and self.external_agent is None:
+            raise ValueError(
+                "external_agent configuration is required when agent='external_agent'"
+            )
+        return self
 
     # ---- Properties ----
 
